@@ -1,0 +1,112 @@
+/* ==========================================================================
+   DESIGN INTERACTIF GHIBLI - ÉCRAN DE CONNEXION / INSCRIPTION
+   ========================================================================== */
+
+/* 1. Le Fond Général de la Fenêtre */
+.login-tab-pane {
+    -fx-background-color: #f0f4f1; /* Un blanc-vert très doux, typique des décors Ghibli */
+}
+
+/* 2. Personnalisation et "Invisibilisation" de la barre d'onglets (TabPane) */
+.login-tab-pane .tab-header-area {
+    -fx-padding: 15 0 0 0;
+    -fx-background-color: transparent; /* Supprime le gros bloc gris en haut */
+}
+
+.login-tab-pane .tab {
+    -fx-background-color: #e2ebe5;
+    -fx-background-radius: 15 15 0 0;
+    -fx-padding: 6 20 6 20;
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-text-fill: #556b2f; /* Vert olive foncé */
+    -fx-font-weight: bold;
+}
+
+.login-tab-pane .tab:hover {
+    -fx-background-color: #d2ded5;
+    -fx-cursor: hand;
+}
+
+/* L'onglet actuellement sélectionné */
+.login-tab-pane .tab:selected {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #2d6a4f; /* Vert forêt Totoro */
+    -fx-border-color: transparent;
+}
+
+/* Supprime la petite ligne de bordure sous les onglets */
+.login-tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+/* 3. L'effet "Carte magique" pour le conteneur du formulaire */
+.login-container {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 0 0 20 20; /* Arrondit les coins inférieurs pour épouser le style */
+    -fx-padding: 30;
+    
+    /* Une ombre portée subtile pour donner de la profondeur en plein écran */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.08), 15, 0, 0, 8);
+}
+
+/* 4. Titre Principal texturé */
+.login-title {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-weight: 700;
+    -fx-font-size: 20px;
+    -fx-text-fill: #0b954b;
+    -fx-padding: 0 10 10 0;
+}
+
+/* 5. Champs de saisie (Inputs) */
+.login-input {
+    -fx-min-width: 260px; /* Légèrement plus large pour un meilleur confort visuel */
+    -fx-max-width: 260px;
+    -fx-background-radius: 20;
+    -fx-padding: 10 14;
+    -fx-border-color: #cfe1d6;
+    -fx-border-radius: 20;
+    -fx-background-color: #f9fbf9;
+    -fx-font-size: 13px;
+}
+
+.login-input:focused {
+    -fx-border-color: #2d6a4f;
+    -fx-border-width: 1.5px;
+    -fx-background-color: #ffffff;
+    -fx-effect: dropshadow(three-pass-box, rgba(45, 106, 79, 0.15), 5, 0, 0, 0);
+}
+
+/* 6. Le Bouton d'action principal */
+.login-button {
+    -fx-background-color: #2d6a4f;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 10 35;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-margin: 10 0 0 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(45, 106, 79, 0.3), 8, 0, 0, 4);
+}
+
+.login-button:hover {
+    -fx-background-color: #1b4332;
+    -fx-effect: dropshadow(three-pass-box, rgba(27, 67, 50, 0.4), 10, 0, 0, 5);
+}
+
+/* 7. Liens et messages */
+.login-link {
+    -fx-text-fill: #52b788;
+    -fx-font-size: 12px;
+    -fx-underline: false;
+}
+.login-link:hover {
+    -fx-text-fill: #2d6a4f;
+    -fx-underline: true;
+}
+
+.login-message {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}

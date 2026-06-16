@@ -1,0 +1,160 @@
+/* On applique un padding pour l'espacement des fenêtres */
+.root {
+    -fx-padding: 20;
+}
+
+.fond-application {
+    -fx-background-image: url("Chihiro/background.png");
+    -fx-background-size: cover;
+    -fx-background-position: center;
+}
+
+/* On force le fond de la fenêtre contextuelle descendante (Pop-up) des ComboBox à être neutre */
+.combo-box-popup > .table-view, 
+.context-menu {
+    -fx-background-image: none; /* Supprime l'image en miniature */
+    -fx-background-color: white; /* Fond propre pour lire les options */
+    -fx-background-radius: 5;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 5;
+}
+
+/* On s'assure que les cellules à l'intérieur du menu déroulant sont lisibles */
+.combo-box-popup > .table-view > .virtual-flow > .clipped-container > .sheet > .table-cell {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+}
+
+.combo-box-popup > .table-view > .virtual-flow > .clipped-container > .sheet > .table-cell:hover {
+    -fx-background-color: #e3f2fd;
+}
+
+/* On force tous les panneaux intermédiaires à être transparents */
+/* Sinon, le blanc ou gris par défaut des VBox cachera l'image */
+.vbox, .hbox {
+    -fx-background-color: transparent;
+}
+
+/* Le conteneur global du tableau (Bordures et fond de secours) */
+.table-view {
+    -fx-background-color: rgba(255, 255, 255, 0.15); /* Ultra transparent */
+    -fx-background-radius: 15;
+    -fx-border-color: rgba(255, 255, 255, 0.4);
+    -fx-border-radius: 15;
+    -fx-padding: 5;
+}
+
+/* Configuration de la zone des en-têtes pour créer une vraie démarcation visuelle sombre */
+.table-view .column-header-background {
+    -fx-background-color: #2C3E50; /* Bleu nuit/sombre Ghibli très élégant */
+    -fx-background-radius: 10 10 0 0; /* Arrondit uniquement les coins supérieurs */
+}
+
+/* On s'assure que chaque colonne d'en-tête soit transparente pour révéler le fond sombre du dessus */
+.table-view .column-header,
+.table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(255, 255, 255, 0.1); /* Ligne de séparation très discrète entre les titres */
+    -fx-border-width: 0 1 0 0;
+}
+
+/* Rendre explicitement TOUTES les lignes vides en bas du tableau complètement transparentes */
+.table-view .table-row-cell:empty {
+    -fx-background-color: transparent;
+}
+
+/* Style des lignes contenant une tâche (Un fond blanc semi-opaque à 92% pour détacher le texte) */
+.table-row-cell:filled {
+    -fx-background-color: rgba(255, 255, 255, 0.92); /* 92% d'opacité : le texte noir ressortira parfaitement */
+    -fx-background-radius: 8;
+    -fx-background-insets: 2; /* Crée un léger espace entre les lignes */
+}
+
+/* Alternative : Si une ligne contenant une tâche est alternée (une sur deux), on la foncerait un tout petit peu */
+.table-row-cell:filled:odd {
+    -fx-background-color: rgba(245, 247, 250, 0.95);
+}
+
+/* Style du texte à l'intérieur des cellules */
+.table-cell {
+    -fx-text-fill: #1a252f; /* Bleu-noir très sombre pour un contraste maximal */
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold; /* Optionnel : écrit en gras pour améliorer la lecture */
+    -fx-padding: 8;
+}
+
+/* Customisation des En-têtes du tableau (Nom, Date, etc.) pour qu'ils restent visibles */
+.table-view .column-header .label {
+    -fx-text-fill: white; /* Écrit en blanc pour contraster avec ton fond sombre */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-effect: null; /* Pas d'ombre nécessaire sur le fond bleu nuit */
+}
+
+/* Effet lorsque la souris survol les cellules */
+.table-cell:hover {
+    -fx-background-color: #94c1eef6;
+    -fx-background-radius: 10;
+}
+
+/* Quand une ligne de tâche est sélectionnée */
+.table-row-cell:filled:selected {
+    -fx-background-color: #4A90E2; /* Bleu Ghibli opaque */
+    -fx-background-radius: 8;
+}
+
+/* On force le texte de la ligne sélectionnée à devenir blanc */
+.table-row-cell:filled:selected .table-cell {
+    -fx-text-fill: white;
+}
+
+
+/* Style pour rendre les Labels ultra-lisibles peu importe le fond */
+.label {
+    -fx-text-fill: #ffffff; /* On passe le texte en BLANC (ressort parfaitement sur le sombre) */
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    /* Ombre portée NOIRE très nette pour entourer les lettres blanches (effet contour) */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.9), 6, 0.0, 1, 1);
+}
+
+/* Cible les chiffres (0, 25, 50, 75, 100) de l'avancement */
+.slider .axis {
+    -fx-tick-label-fill: white; /* Couleur des chiffres */
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+/* Cible les petites barres de graduation de l'avancement */
+.slider .axis .axis-tick-mark {
+    -fx-stroke: white; /* Couleur des petits traits */
+    -fx-stroke-width: 2;
+}
+
+/* Rendre la barre elle-même plus visible */
+.slider .track {
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+    -fx-background-insets: 0;
+    -fx-background-radius: 5;
+}
+
+/* Rendre le bouton de couleur bleu */
+.slider .thumb {
+    -fx-background-color: #4A90E2;
+    -fx-background-radius: 10;
+}
+
+/* Le style pour la bulle de pensée de la Noiraude tout en bas */
+.tooltip {
+    -fx-font-size: 12px;
+    -fx-font-weight: normal;
+    -fx-text-fill: #2c3e50;             /* Texte bleu foncé/gris */
+    -fx-background-color: #fcf8f2;      /* Fond crème uni style papier Ghibli (100% opaque) */
+    -fx-border-color: #7f8c8d;          /* Bordure fine grise */
+    -fx-border-width: 1px;
+    -fx-border-radius: 15px;             /* Angles arrondis */
+    -fx-background-radius: 15px;
+    -fx-padding: 10px;                  /* Marges internes */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 5, 0, 0, 3); /* Ombre portée */
+}
