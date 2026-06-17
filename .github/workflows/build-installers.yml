@@ -27,6 +27,7 @@ jobs:
           jpackage `
             --module-path "target/libs;target/app-1.0-SNAPSHOT.jar" `
             --module com.ghibli.todolist/com.ghibli.todolist.Launcher `
+            --add-modules jdk.crypto.ec,jdk.crypto.cryptoki `
             --dest installer `
             --name "Totoro ToDoList" `
             --type exe `
@@ -62,6 +63,7 @@ jobs:
           jpackage \
             --module-path "target/libs:target/app-1.0-SNAPSHOT.jar" \
             --module com.ghibli.todolist/com.ghibli.todolist.Launcher \
+            --add-modules jdk.crypto.ec,jdk.crypto.cryptoki \
             --dest installer \
             --name "Totoro ToDoList" \
             --type dmg \
