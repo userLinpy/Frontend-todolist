@@ -1,6 +1,5 @@
 package com.ghibli.todolist;
 
-import java.text.DecimalFormat;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -37,8 +36,8 @@ public class App extends Application {
 
     // Liste des thèmes prédéfinis (remplacez les noms de fichiers par vos futures images)
     public static final List<ThemeDef> THEMES_DISPOS = List.of(
-        new ThemeDef("Chihiro (Classique)", "/Chihiro/background.png", "/Chihiro/noiraudes_vide.png", "/Chihiro/noiraudes_tache.png", "/Chihiro/noiraudes_fini.png", "/Chihiro/noiraudes_vide.png"),
-        new ThemeDef("Totoro", "/Totoro/background.png", "/Totoro/toto_vide.png", "/Totoro/toto_tache.png", "/Totoro/toto_fini.png", "/Totoro/toto_nothing.png"),
+        new ThemeDef("Chihiro (Classique)", "/Chihiro/background.png", "/Chihiro/noiraudes_vide.png", "/Chihiro/noiraudes_tache.png", "/Chihiro/noiraudes_fini.png", "/Chihiro/noiraudes_nothing.png"),
+        new ThemeDef("Totoro", "/Totoro/background2.png", "/Totoro/toto_vide.png", "/Totoro/toto_tache.png", "/Totoro/toto_fini.png", "/Totoro/toto_nothing.png"),
         new ThemeDef("Kiki", "/Kiki/background.png", "/Kiki/jiji_vide.png", "/Kiki/jiji_tache.png", "/Kiki/jiji_fini.png", "/Kiki/jiji_nothing.png")
     );
 
@@ -236,7 +235,6 @@ public class App extends Application {
 
         // On personnalise l'affichage de l'avancement
         colAvanc.setCellFactory(column -> new TableCell<Tache, Double>() {
-            private final DecimalFormat df = new DecimalFormat("#,##");
             @Override
             protected void updateItem(Double avancement, boolean empty) {
                 super.updateItem(avancement, empty);
@@ -244,7 +242,7 @@ public class App extends Application {
                     setText(null);
                 }
                 else {
-                    setText(df.format(avancement) + "%");
+                    setText((int) Math.round(avancement) + "%");
                 }
             }
         });
@@ -485,8 +483,16 @@ public class App extends Application {
                     alert1.setContentText("Voulez-vous vraiment supprimer la tâche sélectionnée ?");
                     alert1.showAndWait().ifPresent(response -> {
                     if (response == ButtonType.OK) {
-                        masterData.removeAll(selecTasks);
-                        
+                        Tache tacheASupprimer = selecTasks.get(0);
+                        if (tacheASupprimer.getId() != null) {
+                            boolean ok = apiService.supprimerTache(tacheASupprimer.getId());
+                            if (!ok) {
+                                new Alert(Alert.AlertType.ERROR, "Erreur : La tâche n'a pas pu être supprimée du serveur.").show();
+                                return;
+                            }
+                        }
+                        masterData.remove(tacheASupprimer);
+
                         viderTout();
                         actualiserPersonnage("VIDE");
                     }
@@ -500,19 +506,26 @@ public class App extends Application {
                     alert2.setTitle("Supression Groupée");
                     alert2.setHeaderText("Supprimer les tâches sélectionnées");
                     alert2.setContentText("Voulez-vous vraiment supprimer les " + selecTasks.size() + " tâches sélectionnées ?");
-                    
+
                     alert2.showAndWait().ifPresent(response -> {
                         if (response == ButtonType.OK) {
-                            // Pour éviter les conflits d'index pendant la suppression,
-                            // on fait une copie temporaire de la sélection
                             List<Tache> delTasks = new ArrayList<>(selecTasks);
+                            boolean tousOk = true;
+                            for (Tache t : delTasks) {
+                                if (t.getId() != null && !apiService.supprimerTache(t.getId())) {
+                                    tousOk = false;
+                                }
+                            }
+                            if (!tousOk) {
+                                new Alert(Alert.AlertType.ERROR, "Certaines tâches n'ont pas pu être supprimées du serveur.").show();
+                            }
                             masterData.removeAll(delTasks);
-                            
+
                             viderTout();
                             tableView.getSelectionModel().clearSelection(); // On désélectionne les tâches
                             filterRefresh();
                             actualiserPersonnage("VIDE");
-                        } 
+                        }
                         tableView.getSelectionModel().clearSelection(); // On désélectionne les tâches
                     });
                 }

@@ -281,6 +281,22 @@ public class ApiService {
         }
     }
 
+    // SUPPRIMER UNE TÂCHE
+    public boolean supprimerTache(Long tacheId) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/tache/" + tacheId))
+                    .DELETE()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // RÉCUPÉRER LES MEMBRES D'UN GROUPE
     public List<String> getMembresGroupe(Long tableauId) {
         try {
