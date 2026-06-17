@@ -31,8 +31,9 @@ jobs:
             --dest installer `
             --name "Totoro ToDoList" `
             --type exe `
-            --app-version 1.0 `
+            --app-version 1.2 `
             --vendor "Ghibli Dev" `
+            --icon "target/classes/background.ico" `
             --win-shortcut `
             --win-menu
 
@@ -67,8 +68,9 @@ jobs:
             --dest installer \
             --name "Totoro ToDoList" \
             --type dmg \
-            --app-version 1.0 \
-            --vendor "Ghibli Dev"
+            --app-version 1.2 \
+            --vendor "Ghibli Dev" \
+            --icon "target/classes/background.icns"
 
       - name: Upload macOS installer
         uses: actions/upload-artifact@v4
