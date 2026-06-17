@@ -1,0 +1,109 @@
+name: Build Installers
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        working-directory: app
+        run: mvn clean package -DskipTests
+
+      - name: Create Windows installer (.exe)
+        working-directory: app
+        run: |
+          jpackage `
+            --input target `
+            --dest installer `
+            --name "Totoro ToDoList" `
+            --main-jar app-1.0-SNAPSHOT.jar `
+            --main-class com.ghibli.todolist.Launcher `
+            --type exe `
+            --app-version 1.0 `
+            --vendor "Ghibli Dev" `
+            --win-shortcut `
+            --win-menu `
+            --module-path target/libs `
+            --add-modules javafx.controls,javafx.graphics,javafx.base
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: app/installer/*.exe
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        working-directory: app
+        run: mvn clean package -DskipTests
+
+      - name: Create macOS installer (.dmg)
+        working-directory: app
+        run: |
+          jpackage \
+            --input target \
+            --dest installer \
+            --name "Totoro ToDoList" \
+            --main-jar app-1.0-SNAPSHOT.jar \
+            --main-class com.ghibli.todolist.Launcher \
+            --type dmg \
+            --app-version 1.0 \
+            --vendor "Ghibli Dev" \
+            --module-path target/libs \
+            --add-modules javafx.controls,javafx.graphics,javafx.base
+
+      - name: Upload macOS installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-installer
+          path: app/installer/*.dmg
+
+  release:
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows installer
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: installers/
+
+      - name: Download macOS installer
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-installer
+          path: installers/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installers/*
+          name: "Totoro ToDoList ${{ github.ref_name }}"
+          body: |
+            ## Totoro ToDoList ${{ github.ref_name }}
+
+            ### Téléchargement
+            - **Windows** : téléchargez le fichier `.exe` et lancez l'installeur
+            - **macOS** : téléchargez le fichier `.dmg`, ouvrez-le et glissez l'app dans Applications

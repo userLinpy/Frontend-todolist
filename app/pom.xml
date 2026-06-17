@@ -4,12 +4,12 @@
     <groupId>com.ghibli.todolist</groupId>
     <artifactId>app</artifactId>
     <version>1.0-SNAPSHOT</version>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <javafx.version>13</javafx.version> 
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <javafx.version>17.0.11</javafx.version>
     </properties>
 
     <dependencies>
@@ -40,9 +40,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.11.0</version>
                 <configuration>
-                    <release>11</release>
+                    <release>17</release>
                 </configuration>
             </plugin>
 
@@ -54,7 +54,7 @@
                     <execution>
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.ghibli.todolist.App</mainClass>
+                            <mainClass>com.ghibli.todolist/com.ghibli.todolist.App</mainClass>
                         </configuration>
                     </execution>
                 </executions>
@@ -92,7 +92,6 @@
                     </archive>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 </project>
