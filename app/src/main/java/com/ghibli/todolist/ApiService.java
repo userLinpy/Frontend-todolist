@@ -281,6 +281,25 @@ public class ApiService {
         }
     }
 
+    // MODIFIER UNE TÂCHE EXISTANTE
+    public boolean modifierTache(Long tacheId, Tache tache) {
+        try {
+            String jsonPayload = objectMapper.writeValueAsString(tache);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/tache/" + tacheId))
+                    .header("Content-Type", "application/json")
+                    .PUT(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // SUPPRIMER UNE TÂCHE
     public boolean supprimerTache(Long tacheId) {
         try {

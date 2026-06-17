@@ -540,9 +540,16 @@ public class App extends Application {
                 t.setDateFinTache(dateFinPicker.getValue());
                 t.setPriorite(priorityInput.getValue());
                 t.setAvancement(AvancSlider.getValue());
-                
+
+                if (t.getId() != null) {
+                    boolean ok = apiService.modifierTache(t.getId(), t);
+                    if (!ok) {
+                        new Alert(Alert.AlertType.ERROR, "Erreur : La tâche n'a pas pu être mise à jour sur le serveur.").show();
+                    }
+                }
+
                 viderTout();
-                tableView.getSelectionModel().clearSelection(); // On désélectionne la tâche 
+                tableView.getSelectionModel().clearSelection(); // On désélectionne la tâche
                 actualiserPersonnage("RIEN");
                 filterRefresh();
             }
@@ -574,6 +581,9 @@ public class App extends Application {
                 for (Tache t : tachesAModifier) {
                     if (t != null) {
                         t.setAvancement(nouvelAvancement);
+                        if (t.getId() != null) {
+                            apiService.modifierTache(t.getId(), t);
+                        }
                     }
                 }
 
