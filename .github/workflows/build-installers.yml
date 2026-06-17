@@ -25,18 +25,15 @@ jobs:
         working-directory: app
         run: |
           jpackage `
-            --input target `
+            --module-path "target/libs;target/app-1.0-SNAPSHOT.jar" `
+            --module com.ghibli.todolist/com.ghibli.todolist.Launcher `
             --dest installer `
             --name "Totoro ToDoList" `
-            --main-jar app-1.0-SNAPSHOT.jar `
-            --main-class com.ghibli.todolist.Launcher `
             --type exe `
             --app-version 1.0 `
             --vendor "Ghibli Dev" `
             --win-shortcut `
-            --win-menu `
-            --module-path target/libs `
-            --add-modules javafx.controls,javafx.graphics,javafx.base
+            --win-menu
 
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4
@@ -63,16 +60,13 @@ jobs:
         working-directory: app
         run: |
           jpackage \
-            --input target \
+            --module-path "target/libs:target/app-1.0-SNAPSHOT.jar" \
+            --module com.ghibli.todolist/com.ghibli.todolist.Launcher \
             --dest installer \
             --name "Totoro ToDoList" \
-            --main-jar app-1.0-SNAPSHOT.jar \
-            --main-class com.ghibli.todolist.Launcher \
             --type dmg \
             --app-version 1.0 \
-            --vendor "Ghibli Dev" \
-            --module-path target/libs \
-            --add-modules javafx.controls,javafx.graphics,javafx.base
+            --vendor "Ghibli Dev"
 
       - name: Upload macOS installer
         uses: actions/upload-artifact@v4
