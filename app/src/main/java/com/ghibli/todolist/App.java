@@ -38,7 +38,7 @@ public class App extends Application {
     // Liste des thèmes prédéfinis (remplacez les noms de fichiers par vos futures images)
     public static final List<ThemeDef> THEMES_DISPOS = List.of(
         new ThemeDef("Chihiro (Classique)", "/Chihiro/background.png", "/Chihiro/noiraudes_vide.png", "/Chihiro/noiraudes_tache.png", "/Chihiro/noiraudes_fini.png", "/Chihiro/noiraudes_nothing.png"),
-        new ThemeDef("Totoro", "/Totoro/background2.png", "/Totoro/toto_vide.png", "/Totoro/toto_tache.png", "/Totoro/toto_fini.png", "/Totoro/toto_nothing.png"),
+        new ThemeDef("Totoro", "/Totoro/background.png", "/Totoro/toto_vide.png", "/Totoro/toto_tache.png", "/Totoro/toto_fini.png", "/Totoro/toto_nothing.png"),
         new ThemeDef("Kiki", "/Kiki/background.png", "/Kiki/jiji_vide.png", "/Kiki/jiji_tache.png", "/Kiki/jiji_fini.png", "/Kiki/jiji_nothing.png")
     );
 
