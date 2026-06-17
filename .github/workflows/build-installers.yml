@@ -103,6 +103,7 @@ jobs:
         with:
           files: installers/*
           name: "Totoro ToDoList ${{ github.ref_name }}"
+          token: ${{ secrets.RELEASE_TOKEN }}
           body: |
             ## Totoro ToDoList ${{ github.ref_name }}
 
