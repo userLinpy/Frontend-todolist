@@ -2,6 +2,7 @@ package com.ghibli.todolist;
 
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -425,8 +426,6 @@ public class App extends Application {
             }
         });
 
-        // Tri chronologique (du plus proche au plus loin )
-        sortedData.setComparator((tache1, tache2) -> tache1.getDateFinTache().compareTo(tache2.getDateFinTache()));
         // On lie le comparateur de la SortedList à celui de la TableView
         // Cela permet à JavaFX de mettre à jour la liste dès que l'utilisateur clique sur une colonne
         sortedData.comparatorProperty().bind(tableView.comparatorProperty());
@@ -441,30 +440,27 @@ public class App extends Application {
             if (titleInput.getText().trim().isEmpty() || dateFinPicker.getValue() == null) {
                 new Alert(Alert.AlertType.ERROR, "Le titre et la date sont obligatoires !").show();
             } else {
-                // 1. On crée l'objet Tache localement avec les saisies de l'utilisateur
+                if (App.idTableauActif == null) {
+                    new Alert(Alert.AlertType.WARNING, "Erreur : Aucun espace personnel trouvé. Veuillez vous reconnecter.").show();
+                    return;
+                }
                 Tache t = new Tache(titleInput.getText(), descInput.getText(), dateFinPicker.getValue(), priorityInput.getValue());
                 t.setAvancement(AvancSlider.getValue());
-
-                // 2. On vérifie qu'on possède bien l'ID du tableau récupéré au Login
-                if (App.idTableauActif != null) {
-
-                    // 3. 🌟 On envoie la tâche au serveur via l'ApiService
-                    boolean succesServeur = apiService.creerTache(App.idTableauActif, t);
-
-                    if (succesServeur) {
-                        // Si le serveur a bien enregistré en Base de Données (Réponse 200)
-                        masterData.add(t); // On l'ajoute à l'affichage de la table
-
-                        viderTout();
-                        actualiserPersonnage("RIEN");
-                    } else {
-                        // Si le serveur a renvoyé une erreur ou est éteint
-                        new Alert(Alert.AlertType.ERROR, "Erreur : Le serveur n'a pas pu enregistrer la tâche.").show();
-                    }
-
-                } else {
-                    new Alert(Alert.AlertType.WARNING, "Erreur : Aucun espace personnel trouvé. Veuillez vous reconnecter.").show();
-                }
+                addBtn.setDisable(true);
+                final Long tableauId = App.idTableauActif;
+                new Thread(() -> {
+                    Tache tacheCreee = apiService.creerTache(tableauId, t);
+                    Platform.runLater(() -> {
+                        addBtn.setDisable(false);
+                        if (tacheCreee != null) {
+                            masterData.add(tacheCreee);
+                            viderTout();
+                            actualiserPersonnage("RIEN");
+                        } else {
+                            new Alert(Alert.AlertType.ERROR, "Erreur : Le serveur n'a pas pu enregistrer la tâche.").show();
+                        }
+                    });
+                }).start();
             }
         });
 
@@ -484,17 +480,19 @@ public class App extends Application {
                     alert1.showAndWait().ifPresent(response -> {
                     if (response == ButtonType.OK) {
                         Tache tacheASupprimer = selecTasks.get(0);
-                        if (tacheASupprimer.getId() != null) {
-                            boolean ok = apiService.supprimerTache(tacheASupprimer.getId());
-                            if (!ok) {
-                                new Alert(Alert.AlertType.ERROR, "Erreur : La tâche n'a pas pu être supprimée du serveur.").show();
-                                return;
-                            }
-                        }
                         masterData.remove(tacheASupprimer);
-
                         viderTout();
                         actualiserPersonnage("VIDE");
+                        if (tacheASupprimer.getId() != null) {
+                            final Long id = tacheASupprimer.getId();
+                            new Thread(() -> {
+                                boolean ok = apiService.supprimerTache(id);
+                                if (!ok) {
+                                    Platform.runLater(() ->
+                                        new Alert(Alert.AlertType.ERROR, "Erreur serveur : La tâche n'a pas pu être supprimée.").show());
+                                }
+                            }).start();
+                        }
                     }
                     tableView.getSelectionModel().clearSelection(); // On désélectionne les tâches
                     });
@@ -510,21 +508,23 @@ public class App extends Application {
                     alert2.showAndWait().ifPresent(response -> {
                         if (response == ButtonType.OK) {
                             List<Tache> delTasks = new ArrayList<>(selecTasks);
-                            boolean tousOk = true;
-                            for (Tache t : delTasks) {
-                                if (t.getId() != null && !apiService.supprimerTache(t.getId())) {
-                                    tousOk = false;
-                                }
-                            }
-                            if (!tousOk) {
-                                new Alert(Alert.AlertType.ERROR, "Certaines tâches n'ont pas pu être supprimées du serveur.").show();
-                            }
                             masterData.removeAll(delTasks);
-
                             viderTout();
                             tableView.getSelectionModel().clearSelection(); // On désélectionne les tâches
                             filterRefresh();
                             actualiserPersonnage("VIDE");
+                            new Thread(() -> {
+                                boolean tousOk = true;
+                                for (Tache t : delTasks) {
+                                    if (t.getId() != null && !apiService.supprimerTache(t.getId())) {
+                                        tousOk = false;
+                                    }
+                                }
+                                if (!tousOk) {
+                                    Platform.runLater(() ->
+                                        new Alert(Alert.AlertType.ERROR, "Certaines tâches n'ont pas pu être supprimées du serveur.").show());
+                                }
+                            }).start();
                         }
                         tableView.getSelectionModel().clearSelection(); // On désélectionne les tâches
                     });
@@ -542,10 +542,15 @@ public class App extends Application {
                 t.setAvancement(AvancSlider.getValue());
 
                 if (t.getId() != null) {
-                    boolean ok = apiService.modifierTache(t.getId(), t);
-                    if (!ok) {
-                        new Alert(Alert.AlertType.ERROR, "Erreur : La tâche n'a pas pu être mise à jour sur le serveur.").show();
-                    }
+                    final Long id = t.getId();
+                    final Tache copie = t;
+                    new Thread(() -> {
+                        boolean ok = apiService.modifierTache(id, copie);
+                        if (!ok) {
+                            Platform.runLater(() ->
+                                new Alert(Alert.AlertType.ERROR, "Erreur : La tâche n'a pas pu être mise à jour sur le serveur.").show());
+                        }
+                    }).start();
                 }
 
                 viderTout();
@@ -581,11 +586,17 @@ public class App extends Application {
                 for (Tache t : tachesAModifier) {
                     if (t != null) {
                         t.setAvancement(nouvelAvancement);
-                        if (t.getId() != null) {
+                    }
+                }
+
+                final List<Tache> tachesEnvoi = new ArrayList<>(tachesAModifier);
+                new Thread(() -> {
+                    for (Tache t : tachesEnvoi) {
+                        if (t != null && t.getId() != null) {
                             apiService.modifierTache(t.getId(), t);
                         }
                     }
-                }
+                }).start();
 
                 // ACTIVATION DU VERROU : On interdit à l'écouteur de sélection de modifier l'image
                 blockImageOverride = true;
@@ -755,7 +766,7 @@ public class App extends Application {
             // FILTRE D'IMPORTANCE (ComboBox Radio) 
             String prioVal = filterImportance.getValue();
             if (prioVal != null && !prioVal.equals("Toutes")) {
-                if (!tache.getPriorite().equals(prioVal)) {
+                if (tache.getPriorite() == null || !tache.getPriorite().equals(prioVal)) {
                     return false; // On rejette si la priorité ne correspond pas exactement
                 }
             }

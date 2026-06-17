@@ -163,22 +163,24 @@ public class ApiService {
         }
     }
 
-    public boolean creerTache(Long tableauId, Tache tache) {
+    public Tache creerTache(Long tableauId, Tache tache) {
         try {
             String jsonPayload = objectMapper.writeValueAsString(tache);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(BASE_URL + "/tableau/" + tableauId + "/tache")) // 🌟 URL dynamique !
+                    .uri(URI.create(BASE_URL + "/tableau/" + tableauId + "/tache"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
+            if (response.statusCode() == 200) {
+                return objectMapper.readValue(response.body(), Tache.class);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
+        return null;
     }
 
     // CRÉER UN GROUPE COLLECTIF
