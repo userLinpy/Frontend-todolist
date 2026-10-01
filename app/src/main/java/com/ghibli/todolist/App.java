@@ -18,6 +18,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import java.util.Map;
 
 public class App extends Application {
 
@@ -100,6 +101,9 @@ public class App extends Application {
 
         // On reveille le serveur dès l'ouverture de l'appli
         apiService.reveillerServeur();
+
+        // On vérifie s'il existe une nouvelle version
+        verifierMiseAJour();
 
         // 1. On prépare le Login
         LoginStage loginStage = new LoginStage(apiService, () -> {
@@ -847,6 +851,96 @@ public class App extends Application {
             }
         });
         reglages.showAndWait();
+    }   
+
+    // VÉRIFIER S'IL EXISTE UNE NOUVELLE VERSION
+    private void verifierMiseAJour() {
+        // jpackage indique automatiquement la version installée.
+        // Si l'appli est lancée avec mvn, cette valeur est absente : on ne vérifie rien.
+        String versionActuelle = System.getProperty("jpackage.app-version");
+        if (versionActuelle == null) return;
+
+        Thread t = new Thread(() -> {
+            Map<String, String> info = apiService.getDerniereVersion();
+            if (info == null || !estPlusRecente(info.get("version"), versionActuelle)) return;
+
+            Platform.runLater(() -> {
+                ButtonType btnMaj = new ButtonType("Mettre à jour", ButtonBar.ButtonData.OK_DONE);
+                ButtonType btnPlusTard = new ButtonType("Plus tard", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                Alert alert = new Alert(AlertType.INFORMATION,
+                        "Une nouvelle version de l'application est disponible.", btnMaj, btnPlusTard);
+                alert.setTitle("Mise à jour disponible");
+                alert.setHeaderText("Version " + info.get("version") + " (vous avez la " + versionActuelle + ")");
+
+                alert.showAndWait().ifPresent(reponse -> {
+                    if (reponse == btnMaj) {
+                        installerMiseAJour(info.get("url"));
+                    }
+                });
+            });
+        });
+        t.setDaemon(true); // le thread ne bloque pas la fermeture de l'appli
+        t.start();
+    }
+
+    // COMPARER DEUX NUMÉROS DE VERSION ("1.10" est bien plus récent que "1.9")
+    private boolean estPlusRecente(String nouvelle, String actuelle) {
+        String[] a = nouvelle.split("\\.");
+        String[] b = actuelle.split("\\.");
+        for (int i = 0; i < Math.max(a.length, b.length); i++) {
+            int x = i < a.length ? Integer.parseInt(a[i]) : 0;
+            int y = i < b.length ? Integer.parseInt(b[i]) : 0;
+            if (x != y) return x > y;
+        }
+        return false;
+    }
+
+    // TÉLÉCHARGER ET LANCER LA MISE À JOUR
+    private void installerMiseAJour(String url) {
+        Alert attente = new Alert(AlertType.INFORMATION, "Téléchargement de la mise à jour en cours, veuillez patienter...");
+        attente.setTitle("Mise à jour");
+        attente.setHeaderText(null);
+        attente.show(); // non bloquant : on la fermera à la fin du téléchargement
+    
+        Thread t = new Thread(() -> {
+            java.nio.file.Path fichier = apiService.telechargerMiseAJour(url);
+    
+            Platform.runLater(() -> {
+                attente.close();
+    
+                if (fichier == null) {
+                    new Alert(AlertType.ERROR, "Le téléchargement a échoué. Réessayez plus tard.").show();
+                    return;
+                }
+    
+                try {
+                    boolean estMac = System.getProperty("os.name").toLowerCase().contains("mac");
+    
+                    if (estMac) {
+                        // Sur Mac : on ouvre le .dmg, l'utilisateur glisse l'appli dans Applications
+                        new ProcessBuilder("open", fichier.toString()).start();
+                        Alert info = new Alert(AlertType.INFORMATION,
+                                "Glissez « Totoro ToDoList » dans le dossier Applications et remplacez l'ancienne version, puis relancez l'application.");
+                        info.setHeaderText("Dernière étape");
+                        info.showAndWait();
+                    } else {
+                        // Sur Windows : on lance l'installeur ("start" permet à Windows de demander l'autorisation)
+                        new ProcessBuilder("cmd", "/c", "start", "\"\"", fichier.toString()).start();
+                    }
+    
+                    // On ferme l'appli pour que l'installeur puisse remplacer ses fichiers
+                    Platform.exit();
+                    System.exit(0);
+    
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    new Alert(AlertType.ERROR, "Impossible de lancer la mise à jour : " + e.getMessage()).show();
+                }
+            });
+        });
+        t.setDaemon(true);
+        t.start();
     }
 
     public static void main(String[] args) { launch(); }

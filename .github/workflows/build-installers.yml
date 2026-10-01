@@ -31,11 +31,12 @@ jobs:
             --dest installer `
             --name "Totoro ToDoList" `
             --type exe `
-            --app-version 1.4 `
+            --app-version 1.5 `
             --vendor "Ghibli Dev" `
             --icon "target/classes/background.ico" `
             --win-shortcut `
-            --win-menu
+            --win-menu `
+            --win-upgrade-uuid "5f70fb7b-f3ce-48b0-a477-2cdcf6c1adca" 
 
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4
@@ -68,7 +69,7 @@ jobs:
             --dest installer \
             --name "Totoro ToDoList" \
             --type dmg \
-            --app-version 1.4 \
+            --app-version 1.5 \
             --vendor "Ghibli Dev" \
             --icon "target/classes/background.icns"
 
@@ -101,7 +102,7 @@ jobs:
         with:
           files: installers/*
           name: "Totoro ToDoList ${{ github.ref_name }}"
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           body: |
             ## Totoro ToDoList ${{ github.ref_name }}
 

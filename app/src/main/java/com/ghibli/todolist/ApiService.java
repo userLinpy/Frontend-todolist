@@ -15,6 +15,10 @@ import java.util.Map;
 
 public class ApiService {
 
+    // Adresse de la dernière release publiée sur GitHub
+    private static final String GITHUB_RELEASES_URL =
+        "https://api.github.com/repos/userLinpy/Frontend-todolist/releases/latest";
+
     private static final String BASE_URL = "https://backend-todolist-pi3p.onrender.com/api";
     
     private final HttpClient httpClient;
@@ -29,6 +33,66 @@ public class ApiService {
     public void reveillerServeur() {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(BASE_URL + "/health")).GET().build();
         httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding());
+    }
+
+    // RÉCUPÉRER LA DERNIÈRE VERSION DISPONIBLE
+    // Renvoie {"version": "1.5", "url": "lien du .exe ou du .dmg"}, ou null en cas de problème
+    public Map<String, String> getDerniereVersion() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(GITHUB_RELEASES_URL))
+                    .header("Accept", "application/vnd.github+json")
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) return null;
+
+            com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(response.body());
+            String version = root.get("tag_name").asText().replaceFirst("^v", ""); // "v1.5" -> "1.5"
+
+            // On cherche le fichier adapté au système : .dmg sur Mac, .exe sur Windows
+            String extension = System.getProperty("os.name").toLowerCase().contains("mac") ? ".dmg" : ".exe";
+
+            for (com.fasterxml.jackson.databind.JsonNode asset : root.get("assets")) {
+                if (asset.get("name").asText().endsWith(extension)) {
+                    Map<String, String> info = new HashMap<>();
+                    info.put("version", version);
+                    info.put("url", asset.get("browser_download_url").asText());
+                    return info;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // TÉLÉCHARGER LE FICHIER DE MISE À JOUR DANS LE DOSSIER TEMPORAIRE
+    // Renvoie le chemin du fichier téléchargé, ou null en cas d'échec
+    public java.nio.file.Path telechargerMiseAJour(String url) {
+        try {
+            String nomFichier = url.substring(url.lastIndexOf('/') + 1);
+            java.nio.file.Path destination = java.nio.file.Path.of(System.getProperty("java.io.tmpdir"), nomFichier);
+    
+            // GitHub redirige les téléchargements : il faut un client qui suit les redirections
+            HttpClient client = HttpClient.newBuilder()
+                    .followRedirects(HttpClient.Redirect.NORMAL)
+                    .build();
+    
+            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
+    
+            HttpResponse<java.nio.file.Path> response = client.send(request,
+                    HttpResponse.BodyHandlers.ofFile(destination,
+                            java.nio.file.StandardOpenOption.CREATE,
+                            java.nio.file.StandardOpenOption.WRITE,
+                            java.nio.file.StandardOpenOption.TRUNCATE_EXISTING));
+    
+            return response.statusCode() == 200 ? destination : null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     // MÉTHODE POUR LA CONNEXION (LOGIN) 
