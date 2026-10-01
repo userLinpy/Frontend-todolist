@@ -98,6 +98,9 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage) {
 
+        // On reveille le serveur dès l'ouverture de l'appli
+        apiService.reveillerServeur();
+
         // 1. On prépare le Login
         LoginStage loginStage = new LoginStage(apiService, () -> {
 

@@ -26,6 +26,11 @@ public class ApiService {
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
+    public void reveillerServeur() {
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(BASE_URL + "/health")).GET().build();
+        httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding());
+    }
+
     // MÉTHODE POUR LA CONNEXION (LOGIN) 
     
     public HttpResponse<String> connecter(String username, String password) {
